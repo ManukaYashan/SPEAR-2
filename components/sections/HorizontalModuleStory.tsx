@@ -285,16 +285,51 @@ function DesktopHorizontalScroll() {
 
 /* ============================================================
    MOBILE — Framer Motion drag carousel (no scroll-jacking)
+
+   Bug fixes applied vs. original:
+   1. dragConstraints: was containerRef (overflow:hidden → Framer Motion
+      resolved to zero overflow → all dragging was blocked after panel 1).
+      Now uses explicit { left: -maxDrag, right: 0 } px bounds.
+   2. animate x: was `-${activeIndex * 100}%` which is % of the track
+      width (600vw), so panel 2 would offset by 600vw not 100vw. Now
+      uses containerWidth px per panel.
+   3. Velocity threshold added — fast flicks now reliably advance panels.
+   4. Mobile panel layout replaces the desktop ModulePanel component
+      (which uses 100vh height + 2-column grid that overflows on phones).
    ============================================================ */
 function MobileCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleDragEnd = (_: unknown, info: { offset: { x: number } }) => {
-    const threshold = 60;
-    if (info.offset.x < -threshold && activeIndex < MODULE_COUNT - 1) {
+  useEffect(() => {
+    const measure = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
+    };
+    measure();
+    window.addEventListener("resize", measure, { passive: true });
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  // Total left travel needed to reach last panel
+  const maxDrag = (MODULE_COUNT - 1) * containerWidth;
+  // Pixel offset for the currently active panel
+  const xOffset = containerWidth > 0 ? -(activeIndex * containerWidth) : 0;
+
+  const handleDragEnd = (
+    _: unknown,
+    info: { offset: { x: number }; velocity: { x: number } }
+  ) => {
+    const swipedLeft =
+      info.offset.x < -50 || info.velocity.x < -300;
+    const swipedRight =
+      info.offset.x > 50 || info.velocity.x > 300;
+
+    if (swipedLeft && activeIndex < MODULE_COUNT - 1) {
       setActiveIndex((i) => i + 1);
-    } else if (info.offset.x > threshold && activeIndex > 0) {
+    } else if (swipedRight && activeIndex > 0) {
       setActiveIndex((i) => i - 1);
     }
   };
@@ -302,44 +337,170 @@ function MobileCarousel() {
   return (
     <section
       id="module-story"
-      aria-label="SPEAR module story"
+      aria-label="SPEAR module story — swipe to explore all 6 modules"
       style={{ background: "#1E1712", overflowX: "hidden" }}
     >
-      <div ref={containerRef} style={{ position: "relative", overflow: "hidden" }}>
+      <div
+        ref={containerRef}
+        style={{ position: "relative", overflow: "hidden", width: "100%" }}
+      >
         <motion.div
           drag="x"
-          dragConstraints={containerRef}
+          dragConstraints={{ left: -maxDrag, right: 0 }}
+          dragElastic={0.08}
           onDragEnd={handleDragEnd}
-          animate={{ x: `-${activeIndex * 100}%` }}
+          animate={{ x: xOffset }}
           transition={{ type: "spring", stiffness: 300, damping: 35 }}
-          style={{ display: "flex", width: `${MODULE_COUNT * 100}%`, cursor: "grab" }}
+          style={{
+            display: "flex",
+            width: containerWidth > 0
+              ? `${MODULE_COUNT * containerWidth}px`
+              : `${MODULE_COUNT * 100}vw`,
+            cursor: "grab",
+            willChange: "transform",
+          }}
           whileTap={{ cursor: "grabbing" }}
         >
-          {modules.map((mod) => (
-            <div key={mod.id} style={{ width: `${100 / MODULE_COUNT}%`, flexShrink: 0 }}>
-              <ModulePanel
-                id={mod.id}
-                numeral={mod.numeral}
-                title={mod.title}
-                tagline={mod.tagline}
-                body={mod.body}
-                layout="text-left"
-                isLast={mod.isLast}
-              />
-            </div>
-          ))}
+          {modules.map((mod) => {
+            const gradients: Record<string, { from: string; to: string }> = {
+              "direct-booking":    { from: "#2A1E14", to: "#1E1712" },
+              "hotel-pms":         { from: "#1E2214", to: "#1A1E12" },
+              "restaurant-floor":  { from: "#221A14", to: "#1E1712" },
+              "point-of-sale":     { from: "#261C16", to: "#1E1712" },
+              "kitchen-inventory": { from: "#201C14", to: "#1C1A12" },
+              "channel-manager":   { from: "#241814", to: "#1E1712" },
+            };
+            const g = gradients[mod.id] || { from: "#2C2118", to: "#1E1712" };
+
+            return (
+              <div
+                key={mod.id}
+                style={{
+                  width: containerWidth > 0 ? `${containerWidth}px` : "100vw",
+                  flexShrink: 0,
+                  minHeight: "100svh",
+                  background: `linear-gradient(160deg, ${g.from}, ${g.to})`,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  padding: "5rem 1.5rem 2rem",
+                  boxSizing: "border-box",
+                  userSelect: "none",
+                  WebkitUserSelect: "none" as const,
+                }}
+              >
+                {/* Counter badge */}
+                <span style={{
+                  fontFamily: "var(--font-manrope), system-ui, sans-serif",
+                  fontSize: "0.65rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "#C79A45",
+                  marginBottom: "1rem",
+                  display: "block",
+                }}>
+                  {mod.numeral} / 06
+                </span>
+
+                {/* Title */}
+                <h2
+                  id={`mobile-module-${mod.id}-title`}
+                  style={{
+                    fontFamily: "var(--font-fraunces), Georgia, serif",
+                    fontSize: "clamp(1.55rem, 6.5vw, 2rem)",
+                    fontWeight: 700,
+                    color: "#F3ECE0",
+                    lineHeight: 1.1,
+                    letterSpacing: "-0.02em",
+                    marginBottom: "0.7rem",
+                  }}
+                >
+                  {mod.title}
+                </h2>
+
+                {/* Tagline */}
+                <p style={{
+                  fontFamily: "var(--font-fraunces), Georgia, serif",
+                  fontSize: "clamp(0.88rem, 3.5vw, 1rem)",
+                  fontWeight: 300,
+                  fontStyle: "italic",
+                  color: "#C79A45",
+                  lineHeight: 1.55,
+                  marginBottom: "0.7rem",
+                }}>
+                  {mod.tagline}
+                </p>
+
+                {/* Body */}
+                <p style={{
+                  fontFamily: "var(--font-manrope), system-ui, sans-serif",
+                  fontSize: "clamp(0.8rem, 3vw, 0.92rem)",
+                  color: "#B5A99A",
+                  lineHeight: 1.75,
+                  marginBottom: "1.5rem",
+                }}>
+                  {mod.body}
+                </p>
+
+                {/* Device mockup — constrained width so it never overflows */}
+                <div
+                  style={{
+                    width: "100%",
+                    maxWidth: 320,
+                    margin: "0 auto",
+                    aspectRatio: "16/10",
+                    background: "#261E19",
+                    borderRadius: 8,
+                    border: "1px solid rgba(199,154,69,0.15)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  aria-label={`${mod.title} dashboard preview`}
+                  role="img"
+                >
+                  <span style={{
+                    fontFamily: "var(--font-manrope), system-ui, sans-serif",
+                    fontSize: "0.6rem",
+                    color: "rgba(199,154,69,0.35)",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                  }}>
+                    Dashboard Preview
+                  </span>
+                </div>
+
+                {mod.isLast && (
+                  <p style={{
+                    fontFamily: "var(--font-manrope), system-ui, sans-serif",
+                    fontSize: "0.7rem",
+                    color: "#7A6F63",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    marginTop: "1.5rem",
+                    textAlign: "center",
+                  }}>
+                    Scroll down to continue ↓
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </motion.div>
       </div>
 
+      {/* Dot indicators — tapping also navigates directly */}
       <div
         style={{
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           gap: "0.5rem",
-          padding: "1.5rem 0",
+          padding: "1.25rem 0 1.5rem",
+          background: "#1E1712",
         }}
-        aria-label="Carousel progress"
+        aria-label="Module carousel progress"
         role="tablist"
       >
         {modules.map((mod, i) => (
@@ -347,19 +508,20 @@ function MobileCarousel() {
             key={mod.id}
             role="tab"
             aria-selected={i === activeIndex}
-            aria-label={`Module ${i + 1}: ${mod.title}`}
+            aria-label={`Go to module ${i + 1}: ${mod.title}`}
             id={`mobile-dot-${mod.id}`}
             onClick={() => setActiveIndex(i)}
             style={{
-              width: i === activeIndex ? 20 : 6,
-              height: 6,
-              borderRadius: 3,
-              background: i === activeIndex ? "#C79A45" : "rgba(199,154,69,0.3)",
-              border: "none",
+              width: i === activeIndex ? 22 : 7,
+              height: 7,
+              borderRadius: 4,
+              background: i === activeIndex ? "#C79A45" : "rgba(199,154,69,0.25)",
+              border: i === activeIndex ? "none" : "1px solid rgba(199,154,69,0.35)",
               cursor: "pointer",
               transition: "all 0.3s ease",
               padding: 0,
               outline: "none",
+              flexShrink: 0,
             }}
           />
         ))}

@@ -1,59 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { fadeUpVariant, fadeInVariant, staggerContainer } from "@/lib/motion-variants";
-
-/** Inline SVG spear mark — matches NavBar but larger */
-function SpearMarkHero() {
-  return (
-    <svg
-      width={56}
-      height={56}
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <line
-        x1="3"
-        y1="29"
-        x2="24"
-        y2="8"
-        stroke="#C79A45"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <polygon
-        points="24,8 18,10 22,14"
-        fill="#C79A45"
-        stroke="#C79A45"
-        strokeWidth="0.5"
-        strokeLinejoin="round"
-      />
-      <line
-        x1="15"
-        y1="17"
-        x2="27"
-        y2="21"
-        stroke="#C79A45"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        opacity="0.5"
-      />
-      <line
-        x1="11"
-        y1="21"
-        x2="15"
-        y2="17"
-        stroke="#C79A45"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        opacity="0.5"
-      />
-    </svg>
-  );
-}
 
 /** Scroll cue — vertical line + sliding dot + label */
 function ScrollCueWidget() {
@@ -101,7 +51,7 @@ export default function Hero() {
     if (!el) return;
 
     // Continuous observer — toggles cue based on hero visibility.
-    // Using multiple thresholds so state updates on both entry and exit.
+    // Re-shows the cue when the user scrolls back to the top.
     const observer = new IntersectionObserver(
       ([entry]) => {
         setScrollCueVisible(entry.intersectionRatio >= 0.2);
@@ -143,27 +93,30 @@ export default function Hero() {
         initial="hidden"
         animate="visible"
       >
-        {/* Logo mark */}
+        {/*
+          Real SPEAR logo PNG — replaces the SVG arrow mark + text wordmark + sub-tagline.
+          The image already contains the full wordmark, spear-through-letters graphic,
+          AND the "Smart Platform for Every Accommodation & Restaurant" tagline text,
+          so those three separate elements have been removed.
+          Transparent background reads directly against the dark hero (#1E1712).
+        */}
         <motion.div variants={fadeInVariant}>
-          <SpearMarkHero />
-        </motion.div>
-
-        {/* Wordmark */}
-        <motion.div variants={fadeUpVariant}>
-          <span
-            className="block font-bold tracking-[0.22em] uppercase select-none"
+          <Image
+            src="/logo/spear-logo.png.png"
+            alt="SPEAR — Smart Platform for Every Accommodation & Restaurant"
+            width={600}
+            height={300}
+            priority
             style={{
-              fontFamily: "var(--font-fraunces), Georgia, serif",
-              fontSize: "clamp(3.5rem, 10vw, 7rem)",
-              color: "#C79A45",
-              lineHeight: 1,
+              width: "clamp(360px, 60vw, 780px)",
+              height: "auto",
+              maxWidth: "100%",
+              objectFit: "contain",
             }}
-          >
-            SPEAR
-          </span>
+          />
         </motion.div>
 
-        {/* Tagline — the page's single <h1> */}
+        {/* Tagline — the page's single <h1>. Unchanged position and styling. */}
         <motion.h1
           variants={fadeUpVariant}
           className="max-w-2xl"
@@ -179,21 +132,9 @@ export default function Hero() {
         >
           One platform for every reservation, every table, every guest.
         </motion.h1>
-
-        {/* Sub-tagline label */}
-        <motion.p
-          variants={fadeUpVariant}
-          className="text-sm font-medium tracking-[0.1em] uppercase"
-          style={{
-            color: "#7A6F63",
-            fontFamily: "var(--font-manrope), system-ui, sans-serif",
-          }}
-        >
-          Smart Platform for Every Accommodation &amp; Restaurant
-        </motion.p>
       </motion.div>
 
-      {/* Scroll cue — permanently removed once hero leaves viewport */}
+      {/* Scroll cue — reappears when user scrolls back to top */}
       <AnimatePresence>
         {scrollCueVisible && (
           <motion.div
