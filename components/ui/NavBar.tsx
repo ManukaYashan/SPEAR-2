@@ -104,11 +104,15 @@ export default function NavBar() {
         }}
         aria-label="Primary navigation"
       >
-        {/* Logo — real PNG, height 38px to fit 72px navbar */}
+        {/* Logo — clicks scroll to top of page */}
         <Link
           href="/"
+          onClick={(e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
           style={{ display: "flex", alignItems: "center", textDecoration: "none", flexShrink: 0 }}
-          aria-label="SPEAR — go to homepage"
+          aria-label="SPEAR — go to top of page"
         >
           <Image
             src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/logo/nav%20logo.png`}
@@ -116,7 +120,7 @@ export default function NavBar() {
             width={160}
             height={60}
             priority
-            style={{ height: 38, width: "auto", objectFit: "contain" }}
+            style={{ height: 32, width: "auto", objectFit: "contain" }}
           />
         </Link>
 

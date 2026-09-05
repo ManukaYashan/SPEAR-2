@@ -70,21 +70,25 @@ export default function Footer() {
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           <Link
             href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: "0.6rem",
               textDecoration: "none",
             }}
-            aria-label="SPEAR homepage"
+            aria-label="SPEAR homepage — scroll to top"
           >
-          <Image
-            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/logo/nav%20logo.png`}
-            alt="SPEAR"
-            width={140}
-            height={56}
-            style={{ height: 32, width: "auto", objectFit: "contain" }}
-          />
+            <Image
+              src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/logo/nav%20logo.png`}
+              alt="SPEAR"
+              width={140}
+              height={56}
+              style={{ height: 36, width: "auto", objectFit: "contain" }}
+            />
           </Link>
 
           <p
