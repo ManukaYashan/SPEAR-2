@@ -1,25 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { X, Globe, Share2 } from "lucide-react";
 
-function SpearMarkSmall() {
-  return (
-    <svg
-      width={20}
-      height={20}
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <line x1="4" y1="28" x2="24" y2="8" stroke="#C79A45" strokeWidth="2.2" strokeLinecap="round" />
-      <polygon points="24,8 18,10 22,14" fill="#C79A45" stroke="#C79A45" strokeWidth="0.5" strokeLinejoin="round" />
-      <line x1="16" y1="16" x2="26" y2="20" stroke="#C79A45" strokeWidth="1.6" strokeLinecap="round" opacity="0.6" />
-      <line x1="12" y1="20" x2="16" y2="16" stroke="#C79A45" strokeWidth="1.6" strokeLinecap="round" opacity="0.6" />
-    </svg>
-  );
-}
 
 const FOOTER_LINKS = {
   Product: [
@@ -94,19 +78,13 @@ export default function Footer() {
             }}
             aria-label="SPEAR homepage"
           >
-            <SpearMarkSmall />
-            <span
-              style={{
-                fontFamily: "var(--font-fraunces), Georgia, serif",
-                fontSize: "1.1rem",
-                fontWeight: 700,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "#F3ECE0",
-              }}
-            >
-              SPEAR
-            </span>
+          <Image
+            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/logo/nav%20logo.png`}
+            alt="SPEAR"
+            width={140}
+            height={56}
+            style={{ height: 32, width: "auto", objectFit: "contain" }}
+          />
           </Link>
 
           <p

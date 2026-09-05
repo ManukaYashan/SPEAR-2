@@ -2,24 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
-function SpearMark({ size = 28 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <line x1="4" y1="28" x2="24" y2="8" stroke="#C79A45" strokeWidth="2.2" strokeLinecap="round" />
-      <polygon points="24,8 18,10 22,14" fill="#C79A45" stroke="#C79A45" strokeWidth="0.5" strokeLinejoin="round" />
-      <line x1="16" y1="16" x2="26" y2="20" stroke="#C79A45" strokeWidth="1.6" strokeLinecap="round" opacity="0.6" />
-      <line x1="12" y1="20" x2="16" y2="16" stroke="#C79A45" strokeWidth="1.6" strokeLinecap="round" opacity="0.6" />
-    </svg>
-  );
-}
 
 const NAV_LINKS = [
   { label: "Product", href: "#product" },
@@ -120,32 +104,20 @@ export default function NavBar() {
         }}
         aria-label="Primary navigation"
       >
-        {/* Logo */}
+        {/* Logo — real PNG, height 38px to fit 72px navbar */}
         <Link
           href="/"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.6rem",
-            textDecoration: "none",
-            flexShrink: 0,
-          }}
+          style={{ display: "flex", alignItems: "center", textDecoration: "none", flexShrink: 0 }}
           aria-label="SPEAR — go to homepage"
         >
-          <SpearMark size={26} />
-          <span
-            style={{
-              fontFamily: "var(--font-fraunces), Georgia, serif",
-              fontSize: "1.25rem",
-              fontWeight: 700,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "#F3ECE0",
-              lineHeight: 1,
-            }}
-          >
-            SPEAR
-          </span>
+          <Image
+            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/logo/nav%20logo.png`}
+            alt="SPEAR"
+            width={160}
+            height={60}
+            priority
+            style={{ height: 38, width: "auto", objectFit: "contain" }}
+          />
         </Link>
 
         {/* Nav links — hidden on mobile */}
