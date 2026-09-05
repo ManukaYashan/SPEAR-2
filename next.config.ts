@@ -41,6 +41,16 @@ const nextConfig: NextConfig = {
   },
 
   experimental: {},
+
+  /*
+   * Expose basePath as an env var so components can prefix public-folder
+   * asset paths (e.g. images) correctly. next/image with unoptimized:true
+   * does NOT auto-prepend basePath to the src, so we do it manually.
+   * On localhost this is empty string — no prefix needed.
+   */
+  env: {
+    NEXT_PUBLIC_BASE_PATH: isProd ? "/SPEAR-2" : "",
+  },
 };
 
 export default nextConfig;

@@ -102,7 +102,7 @@ export default function Hero() {
         */}
         <motion.div variants={fadeInVariant}>
           <Image
-            src="/logo/spear-logo.png.png"
+            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/logo/spear-logo.png.png`}
             alt="SPEAR — Smart Platform for Every Accommodation & Restaurant"
             width={600}
             height={300}
