@@ -49,7 +49,7 @@ export default function BookADemo() {
           Accept: "application/json",
         },
         body: JSON.stringify({
-          access_key: "YOUR_ACCESS_KEY_HERE", // IMPORTANT: Replace this with your actual Web3Forms access key
+          access_key: "503de41a-ee74-48df-bb31-ba13feab93de", // IMPORTANT: Replace this with your actual Web3Forms access key
           subject: "New Demo Request from SPEAR Website",
           ...form,
         }),
