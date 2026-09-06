@@ -48,7 +48,7 @@ export default function ModulePanel({
 
   return (
     <section
-      id={id}
+      id={`panel-${id}`}
       aria-labelledby={`module-${id}-title`}
       className="relative flex-shrink-0 flex items-center justify-center overflow-hidden"
       style={{

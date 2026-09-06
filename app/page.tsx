@@ -7,6 +7,7 @@ import HowItWorks from "@/components/sections/HowItWorks";
 import WhyWeBuilt from "@/components/sections/WhyWeBuilt";
 import Pricing from "@/components/sections/Pricing";
 import BookADemo from "@/components/sections/BookADemo";
+import LeadPopup from "@/components/ui/LeadPopup";
 
 /* ============================================================
    PAGE-LEVEL METADATA
@@ -115,6 +116,7 @@ export default function HomePage() {
         <BookADemo />
       </main>
 
+      <LeadPopup />
       <Footer />
     </>
   );

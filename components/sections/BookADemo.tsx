@@ -41,9 +41,30 @@ export default function BookADemo() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("submitting");
-    // TODO: Wire to your form backend (Resend, Formspree, etc.)
-    await new Promise((r) => setTimeout(r, 1000));
-    setStatus("success");
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: "YOUR_ACCESS_KEY_HERE", // IMPORTANT: Replace this with your actual Web3Forms access key
+          subject: "New Demo Request from SPEAR Website",
+          ...form,
+        }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        setStatus("success");
+      } else {
+        console.error("Web3Forms submission failed:", result);
+        setStatus("error");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setStatus("error");
+    }
   };
 
   const inputStyle: React.CSSProperties = {
@@ -195,6 +216,19 @@ export default function BookADemo() {
                 style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}
                 aria-label="Book a demo request form"
               >
+                {status === "error" && (
+                  <div style={{
+                    padding: "1rem",
+                    background: "#FEE2E2",
+                    border: "1px solid #F87171",
+                    borderRadius: 6,
+                    color: "#991B1B",
+                    fontSize: "0.9rem",
+                    fontFamily: "var(--font-manrope), system-ui, sans-serif",
+                  }}>
+                    Something went wrong submitting your request. Please try again.
+                  </div>
+                )}
                 {/* Name */}
                 <div>
                   <label htmlFor="demo-name" style={labelStyle}>
@@ -310,21 +344,23 @@ export default function BookADemo() {
 
                 {/* Submit */}
                 <button
-                  id="demo-submit-btn"
                   type="submit"
                   disabled={status === "submitting"}
                   className="btn-brass"
                   style={{
+                    width: "100%",
                     justifyContent: "center",
-                    marginTop: "0.25rem",
+                    marginTop: "0.5rem",
                     opacity: status === "submitting" ? 0.7 : 1,
                     cursor: status === "submitting" ? "not-allowed" : "pointer",
-                    width: "100%",
                   }}
                   aria-label="Submit demo request"
                 >
-                  <Send size={15} />
-                  {status === "submitting" ? "Sending…" : "Request a Demo"}
+                  {status === "submitting" ? "Submitting..." : (
+                    <>
+                      Request Demo <Send size={18} />
+                    </>
+                  )}
                 </button>
               </form>
             )}

@@ -86,7 +86,7 @@ function DesktopHorizontalScroll() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [visible, setVisible] = useState(false);
 
-  const handleDotClick = useCallback((index: number) => {
+  const scrollToModuleIndex = useCallback((index: number) => {
     import("gsap").then(({ gsap }) => {
       import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
         import("gsap/ScrollToPlugin").then(({ ScrollToPlugin }) => {
@@ -106,6 +106,28 @@ function DesktopHorizontalScroll() {
       });
     });
   }, []);
+
+  const handleDotClick = useCallback((index: number) => {
+    scrollToModuleIndex(index);
+  }, [scrollToModuleIndex]);
+
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (!hash) return;
+      const index = modules.findIndex((m) => m.id === hash);
+      if (index !== -1) {
+        // Slight delay to ensure GSAP is initialized if page just loaded
+        setTimeout(() => {
+          scrollToModuleIndex(index);
+        }, 100);
+      }
+    };
+    
+    handleHash(); // Check on mount
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, [scrollToModuleIndex]);
 
   useEffect(() => {
     let ctx: { revert: () => void } | null = null;
@@ -299,8 +321,25 @@ function DesktopHorizontalScroll() {
    ============================================================ */
 function MobileCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (!hash) return;
+      const index = modules.findIndex((m) => m.id === hash);
+      if (index !== -1) {
+        setActiveIndex(index);
+        // Scroll the page so the section is in view
+        containerRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
+    };
+    
+    handleHash();
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, []);
+  const [containerWidth, setContainerWidth] = useState(0);
 
   useEffect(() => {
     const measure = () => {
@@ -338,11 +377,11 @@ function MobileCarousel() {
     <section
       id="module-story"
       aria-label="SPEAR module story — swipe to explore all 6 modules"
-      style={{ background: "#1E1712", overflowX: "hidden" }}
     >
-      <div
+      <div 
         ref={containerRef}
-        style={{ position: "relative", overflow: "hidden", width: "100%" }}
+        id="module-story" 
+        style={{ position: "relative", overflow: "hidden", width: "100%", background: "#1E1712" }}
       >
         <motion.div
           drag="x"
