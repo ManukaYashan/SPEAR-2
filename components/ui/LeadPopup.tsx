@@ -12,12 +12,6 @@ export default function LeadPopup() {
   const hasTriggeredRef = useRef(false);
 
   useEffect(() => {
-    // Check if already shown in this session
-    if (sessionStorage.getItem("spear_lead_popup_shown") === "true") {
-      hasTriggeredRef.current = true;
-      return;
-    }
-
     const checkShouldShow = () => {
       if (hasTriggeredRef.current) return;
 
@@ -55,7 +49,6 @@ export default function LeadPopup() {
       }
 
       hasTriggeredRef.current = true;
-      sessionStorage.setItem("spear_lead_popup_shown", "true");
       setIsOpen(true);
     };
 
